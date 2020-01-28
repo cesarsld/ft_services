@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: nginx-ingress
+spec:
+ backend:
+   serviceName: wordpress
+   servicePort: 80
