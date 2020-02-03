@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb-svc
+  labels:
+    app: myapp
+spec:
+  type: NodePort
+  ports:
+  - port: 8086
+    protocol: TCP
+    name: http
+  selector:
+    app: myapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: influxdb
+        image: services/influxdb
+        ports:
+        - containerPort: 8086
+        imagePullPolicy: Never
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: influxdb-ingress
+  namespace: default
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /influx
+        backend:
+          serviceName: influxdb-svc
+          servicePort: 8086

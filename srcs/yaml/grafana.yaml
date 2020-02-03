@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  labels:
+    app: myapp
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    nodePort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: myapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: grafana
+        image: services/grafana
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: Never
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: default
+spec:
+  rules:
+  - host: ftservices.rchallie
+  - http:
+      paths:
+      - path: /grafana
+        backend:
+          serviceName: grafana
+          servicePort: 3000
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: grafana
+#   labels:
+#     app: myapp
+# spec:
+#   type: NodePort
+#   ports:
+#   - port: 3000
+#     nodePort: 3000
+#     protocol: TCP
+#     name: http
+#   selector:
+#     app: myapp
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: grafana-deployment
+#   labels:
+#     app: myapp
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: myapp
+#   template:
+#     metadata:
+#       labels:
+#         app: myapp
+#     spec:
+#       containers:
+#       - name: grafana
+#         image: services/grafana
+#         ports:
+#         - containerPort: 3000
+#         imagePullPolicy: Never
+# ---
+# apiVersion: networking.k8s.io/v1beta1
+# kind: Ingress
+# metadata:
+#   name: grafana-ingress
+#   namespace: default
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       - path: /grafana
+#         backend:
+#           serviceName: grafana
+#           servicePort: 3000
