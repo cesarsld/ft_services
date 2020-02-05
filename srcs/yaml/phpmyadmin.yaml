@@ -5,13 +5,12 @@ metadata:
   labels:
     app: phpmyadminapp
 spec:
-  type: NodePort
+  ports:
+  - port: 80
   selector:
     app: phpmyadminapp
-  ports:
-    - protocol: TCP
-      port: 80
-      nodePort: 5000
+    tier: admin
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -31,9 +30,11 @@ spec:
     spec:
       containers:
         - name: phpmyadmin
-          image: phpmyadmin/phpmyadmin
+          image: services/phpmyadmintest
+          imagePullPolicy: Never
           ports:
-            - containerPort: 5000
+            - containerPort: 80
+              hostPort: 5000
           env:
             - name: PMA_ARBITRARY
               value: "1"
@@ -46,6 +47,6 @@ spec:
             - name: PMA_PASSWORD
               value: root
             - name: PMA_ABSOLUTE_URI
-              value: /phpmyadmin/
+              value: /
             - name: MYSQL_ROOT_PASSWORD
               value: root

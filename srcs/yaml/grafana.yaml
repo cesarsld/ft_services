@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: grafana
   labels:
-    app: myapp
+    app: grafanaapp
 spec:
   type: NodePort
   ports:
@@ -12,23 +12,23 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: myapp
+    app: grafanaapp
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana-deployment
   labels:
-    app: myapp
+    app: grafanaapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: grafanaapp
   template:
     metadata:
       labels:
-        app: myapp
+        app: grafanaapp
     spec:
       containers:
       - name: grafana
@@ -44,7 +44,6 @@ metadata:
   namespace: default
 spec:
   rules:
-  - host: ftservices.rchallie
   - http:
       paths:
       - path: /grafana
@@ -57,7 +56,7 @@ spec:
 # metadata:
 #   name: grafana
 #   labels:
-#     app: myapp
+#     app: grafanaapp
 # spec:
 #   type: NodePort
 #   ports:
@@ -66,23 +65,23 @@ spec:
 #     protocol: TCP
 #     name: http
 #   selector:
-#     app: myapp
+#     app: grafanaapp
 # ---
 # apiVersion: apps/v1
 # kind: Deployment
 # metadata:
 #   name: grafana-deployment
 #   labels:
-#     app: myapp
+#     app: grafanaapp
 # spec:
 #   replicas: 1
 #   selector:
 #     matchLabels:
-#       app: myapp
+#       app: grafanaapp
 #   template:
 #     metadata:
 #       labels:
-#         app: myapp
+#         app: grafanaapp
 #     spec:
 #       containers:
 #       - name: grafana

@@ -13,17 +13,16 @@
  * This is needed for cookie based authentication to encrypt password in
  * cookie. Needs to be 32 chars long.
  */
-$cfg['blowfish_secret'] = ''; /* YOU MUST FILL IN THIS FOR COOKIE AUTH! */
-/**
- * Servers configuration
- */
 
-
+/* Ensure we got the environment */
 $vars = array(
+    'PMA_ARBITRARY',
     'PMA_HOST',
-	'PMA_PORT',
-	'PMA_USER',
-	'MYSQL_PORT_3306_TCP_ADDR'
+    'PMA_PORT',
+    'PMA_USER',
+    'PMA_PASSWORD',
+	'PMA_ABSOLUTE_URI',
+	'MYSQL_ROOT_PASSWORD'
 );
 
 foreach ($vars as $var) {
@@ -33,6 +32,10 @@ foreach ($vars as $var) {
     }
 }
 
+$cfg['blowfish_secret'] = ''; /* YOU MUST FILL IN THIS FOR COOKIE AUTH! */
+/**
+ * Servers configuration
+ */
 $i = 0;
 /**
  * First server
@@ -41,20 +44,15 @@ $i++;
 /* Authentication type */
 $cfg['Servers'][$i]['auth_type'] = 'cookie';
 /* Server parameters */
+//$cfg['Servers'][$i]['host'] = 'localhost';
 $cfg['Servers'][$i]['compress'] = false;
 $cfg['Servers'][$i]['AllowNoPassword'] = true;
 
-$cfg['Servers'][$i]['password'] = '';
+$cfg['Servers'][$i]['host'] = array($_ENV['PMA_HOST']);
+$cfg['Servers'][$i]['port'] = array($_ENV['PMA_PORT']);
+$cfg['Servers'][$i]['user'] = array($_ENV['PMA_USER']);
+$cfg['Servers'][$i]['password'] = ""
 
-if (!empty($_ENV['MYSQL_PORT_3306_TCP_ADDR'])) {
-	$cfg['Servers'][$i]['host'] = $_ENV['MYSQL_PORT_3306_TCP_ADDR'];
-}
-if (!empty($_ENV['PMA_PORT'])) {
-	$cfg['Servers'][$i]['port'] = $_ENV['PMA_PORT'];
-}
-if (!empty($_ENV['PMA_USER'])) {
-	$cfg['Servers'][$i]['user'] = $_ENV['PMA_USER'];
-}
 /**
  * phpMyAdmin configuration storage settings.
  */

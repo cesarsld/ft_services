@@ -1,0 +1,8 @@
+#!/bin/sh
+
+sed -i 's/^exec .*//' /docker-entrypoint.sh
+/docker-entrypoint.sh php-fpm
+
+php-fpm &
+/usr/bin/telegraf &
+nginx -g 'daemon off;'

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: influxdb-svc
   labels:
-    app: myapp
+    app: influxdbapp
 spec:
   type: NodePort
   ports:
@@ -11,23 +11,23 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: myapp
+    app: influxdbapp
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: influxdb-deployment
   labels:
-    app: myapp
+    app: influxdbapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: influxdbapp
   template:
     metadata:
       labels:
-        app: myapp
+        app: influxdbapp
     spec:
       containers:
       - name: influxdb
