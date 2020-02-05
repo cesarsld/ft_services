@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: nginx-svc
   labels:
-    app: myapp
+    app: nginxapp
 spec:
   type: NodePort
   ports:
@@ -14,23 +14,23 @@ spec:
     protocol: TCP
     name: https
   selector:
-    app: myapp
+    app: nginxapp
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
   labels:
-    app: myapp
+    app: nginxapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: nginxapp
   template:
     metadata:
       labels:
-        app: myapp
+        app: nginxapp
     spec:
       containers:
       - name: nginx

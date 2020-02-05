@@ -43,21 +43,21 @@ kind: Service
 metadata:
   name: mysql
   labels:
-    app: myapp
+    app: mysqlapp
 spec:
-  type: NodePort
   ports:
     - port: 3306
-      nodePort: 3306
+      targetPort: 3306
   selector:
-    app: myapp
+    app: mysqlapp
+  externalName: mysql.default
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim
   labels:
-    app: myapp
+    app: mysqlapp
 spec:
   accessModes:
     - ReadWriteOnce
@@ -70,16 +70,16 @@ kind: Deployment
 metadata:
   name: mysql-deployment
   labels:
-    app: myapp
+    app: mysqlapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: mysqlapp
   template:
     metadata:
       labels:
-        app: myapp
+        app: mysqlapp
     spec:
       containers:
         - image: services/mysql
