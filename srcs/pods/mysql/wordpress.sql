@@ -445,7 +445,9 @@ CREATE TABLE `wp_users` (
 --
 
 INSERT INTO `wp_users` (`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_url`, `user_registered`, `user_activation_key`, `user_status`, `display_name`) VALUES
-(1, 'root', '$P$BS9I00Fsw1mRe17Ls1Kd5EMBKb6YDo.', 'root', 'cjaimes@student.42.fr', '', '2019-11-09 21:17:18', '', 0, 'root');
+(1, 'root', '$P$BS9I00Fsw1mRe17Ls1Kd5EMBKb6YDo.', 'root', 'cjaimes@student.42.fr', '', '2019-11-09 21:17:18', '', 0, 'root'),
+(2, 'rchandelle', '$P$BJbaZ.Uh1HmK6uktuEtd65hYQG9pkJ.', 'rchandelle', 'rchallie@student.42.fr', '', '2020-02-10 14:54:49', '1581346489:$P$BnvyQvx0SvEJDBDTzMeUTDsQvd1s1t.', 0, 'Romano Chandellier'),
+(3, 'MrWayne', '$P$BMCxGD2AH9ttK3rO2KCCVyRf3vX8A.0', 'mrwayne', 'Batman@42.fr', 'http://Batman.com', '2020-02-10 14:55:50', '1581346550:$P$BTdAq8zKRn2R3V2tvGBU.T5UdT/z/c0', 0, 'Mbruce Wayne');
 
 --
 -- Indexes for dumped tables

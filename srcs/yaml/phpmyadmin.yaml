@@ -36,9 +36,9 @@ spec:
             - name: MYSQL_HOSTNAME
               value: mysql
             - name: PMA_USERNAME
-              value: root
+              value: wp_admin
             - name: PMA_PASSWORD
-              value: root
+              value: admin
 
 # apiVersion: v1
 # kind: Service

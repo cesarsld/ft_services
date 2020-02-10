@@ -48,6 +48,10 @@ cp srcs/pods/mysql/wordpress.sql srcs/pods/mysql/wordpress-tmp.sql
 sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/mysql/wordpress-tmp.sql
 cp srcs/pods/wordpress/wp-config.php srcs/pods/wordpress/wp-config-tmp.php
 sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/wordpress/wp-config-tmp.php
+cp srcs/pods/ftps/vsftpd.conf srcs/pods/ftps/vsftpd-tmp.conf
+sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/ftps/vsftpd-tmp.conf
+cp srcs/pods/ftps/start.sh srcs/pods/ftps/start-tmp.sh
+sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/ftps/start-tmp.sh
 # cp srcs/ftps/scripts/start.sh srcs/ftps/scripts/start-tmp.sh
 # sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/ftps/scripts/start-tmp.sh
 
@@ -55,24 +59,25 @@ sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/wordpress/wp-config-tmp.php
 
 printf "Building Docker images...\n"
 
-docker build -t services/influxdb srcs/pods/influxdb
-docker build -t services/mysql srcs/pods/mysql
-docker build -t services/wordpress srcs/pods/wordpress
-docker build -t services/nginx srcs/pods/nginx
-# docker build -t services/ftps srcs/ftps
-docker build -t services/grafana srcs/pods/grafana
+# docker build -t services/influxdb srcs/pods/influxdb
+# docker build -t services/mysql srcs/pods/mysql
+# docker build -t services/wordpress srcs/pods/wordpress
+# docker build -t services/nginx srcs/pods/nginx
+docker build -t services/ftps srcs/pods/ftps
+# docker build -t services/grafana srcs/pods/grafana
 
 # for SERVICE in $SERVICE_LIST
 # do
 # 	apply_yaml $SERVICE
 # done
 
-kubectl apply -f srcs/yaml/grafana.yaml
-kubectl apply -f srcs/yaml/influxdb.yaml
-kubectl apply -f srcs/yaml/mysql.yaml
-kubectl apply -f srcs/yaml/nginx.yaml
-kubectl apply -f srcs/yaml/phpmyadmin.yaml
-kubectl apply -f srcs/yaml/wordpress.yaml
+# kubectl apply -f srcs/yaml/grafana.yaml
+# kubectl apply -f srcs/yaml/influxdb.yaml
+# kubectl apply -f srcs/yaml/mysql.yaml
+# kubectl apply -f srcs/yaml/nginx.yaml
+# kubectl apply -f srcs/yaml/phpmyadmin.yaml
+# kubectl apply -f srcs/yaml/wordpress.yaml
+kubectl apply -f srcs/yaml/ftps.yaml
 
 # kubectl apply -f srcs/ingress.yaml > /dev/null
 
@@ -82,7 +87,9 @@ kubectl apply -f srcs/yaml/wordpress.yaml
 
 # rm -rf srcs/ftps/scripts/start-tmp.sh
 rm -rf srcs/pods/mysql/wordpress-tmp.sql
-rm -rf srcs/pods/mysql/wp-config-tmp.sql
+rm -rf srcs/pods/wordpress/wp-config-tmp.sql
+rm -rf srcs/pods/ftps/vsftpd-tmp.conf
+rm -rf srcs/pods/ftps/start-tmp.sh
 
 server_ip=`minikube ip`
 echo -ne "\033[1;33m+>\033[0;33m IP : $server_ip \n"
