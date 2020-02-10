@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpressapp
+spec:
+  ports:
+    - port: 80
+      nodePort: 5050
+  selector:
+    app: wordpressapp
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-deployment
+  labels:
+    app: wordpressapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpressapp
+  template:
+    metadata:
+      labels:
+        app: wordpressapp
+    spec:
+      containers:
+      - name: wordpress
+        image: services/wordpress
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Never
+        env:
+          - name: DB_NAME
+            value: wordpress
+          - name: DB_USER
+            value: wp_admin
+          - name: DB_PASSWORD
+            value: admin
+          - name: DB_HOST
+            value: mysql
