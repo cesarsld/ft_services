@@ -1,28 +1,77 @@
 
-brew update
-brew install minikube
-minikube addons enable ingress
-minikube addons enable metrics-server
+# Build function
 
-export MINIKUBE_HOME=~/
+function apply_yaml()
+{
+	kubectl apply -f srcs/$@.yaml > /dev/null
+	printf "Deploying $@...\n"
+	sleep 2;
+	while [[ $(kubectl get pods -l app=$@ -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do
+		sleep 1;
+	done
+	printf "$@ deployed!\n"
+}
 
-cp -avR srcs/pods $MINIKUBE_HOME/.minikube/files/srcs &> /dev/null
+SERVICES="mysql phpmyadmin nginx wordpress ftps influxdb grafana telegraf"
 
-minikube start --vm-driver=virtualbox --extra-config=apiserver.service-node-port-range=1-35000
-export MINIKUBE_IP=$(minikube ip)
-echo "Minikube IP is $MINIKUBE_IP"
+if [[ $1 = 'clean' ]]
+then
+	printf "Cleaning all services...\n"
+	for SERVICE in $SERVICE_LIST
+	do
+		kubectl delete -f srcs/yaml/$SERVICE.yaml > /dev/null
+	done
+	kubectl delete -f srcs/ingress.yaml > /dev/null
+	printf "Clean complete !\n"
+	exit
+fi
 
-minikube ssh 'docker build -t services/nginx /srcs/pods/nginx/'
-minikube ssh 'docker build -t services/influxdb /srcs/pods/influxdb/'
-minikube ssh 'docker build -t services/grafana /srcs/pods/grafana'
-minikube ssh 'docker build -t services/mysql /srcs/pods/mysql'
-minikube ssh 'docker build -t services/phpmyadmin /srcs/pods/phpmyadmin'
 
-kubectl apply -f srcs/yaml/nginx.yaml
-kubectl apply -f srcs/yaml/influxdb.yaml
-kubectl apply -f srcs/yaml/grafana.yaml
-kubectl apply -f srcs/yaml/mysql.yaml
-kubectl apply -f srcs/yaml/phpmyadmin.yaml
+# Start the cluster if it's not running
+
+if [[ $(minikube status | grep -c "Running") == 0 ]]
+then
+	minikube start --cpus=2 --memory 4000 --vm-driver=virtualbox --extra-config=apiserver.service-node-port-range=1-35000
+	minikube addons enable metrics-server
+	minikube addons enable ingress
+	minikube addons enable dashboard
+fi
+
+MINIKUBE_IP=$(minikube ip)
+
+# Set the docker images in Minikube
+
+eval $(minikube docker-env)
+
+# MINIKUBE_IP EDIT
+cp srcs/pods/mysql/wordpress.sql srcs/pods/mysql/wordpress-tmp.sql
+sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/wordpress/files/wordpress-tmp.sql
+cp srcs/ftps/scripts/start.sh srcs/ftps/scripts/start-tmp.sh
+sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/ftps/scripts/start-tmp.sh
+
+# Build Docker images
+
+printf "✓	Building Docker images...\n"
+
+docker build -t services/mysql srcs/mysql
+docker build -t services/wordpress srcs/wordpress
+docker build -t services/nginx srcs/nginx
+docker build -t services/ftps srcs/ftps
+docker build -t services/grafana srcs/grafana
+
+for SERVICE in $SERVICE_LIST
+do
+	apply_yaml $SERVICE
+done
+
+kubectl apply -f srcs/ingress.yaml > /dev/null
+
+# Import Wordpress database
+kubectl exec -i $(kubectl get pods | grep mysql | cut -d" " -f1) -- mysql -u root -e 'CREATE DATABASE wordpress;'
+kubectl exec -i $(kubectl get pods | grep mysql | cut -d" " -f1) -- mysql wordpress -u root < srcs/wordpress/files/wordpress-tmp.sql
+
+rm -rf srcs/ftps/scripts/start-tmp.sh
+rm -rf srcs/pods/mysql/wordpress-tmp.sql
 
 server_ip=`minikube ip`
 echo -ne "\033[1;33m+>\033[0;33m IP : $server_ip \n"
