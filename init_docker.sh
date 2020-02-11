@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -6,12 +6,12 @@
 #                                                     +:+ +:+         +:+      #
 #    By: aguiot-- <aguiot--@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2019/11/09 19:46:48 by aguiot--          #+#    #+#              #
-#    Updated: 2019/11/09 19:46:48 by aguiot--         ###   ########.fr        #
+#    Created: 2019/11/18 08:17:08 by aguiot--          #+#    #+#              #
+#    Updated: 2020/02/10 12:34:50 by aguiot--         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# https://gist.github.com/alexandregv/9f19a72a7340db5c5ea903013fd844dc
+# https://github.com/alexandregv/42toolbox
 
 # Ensure USER variabe is set
 [ -z "${USER}" ] && export USER=`whoami`
@@ -23,25 +23,61 @@ docker_destination="/goinfre/$USER/docker" #=> Select docker destination (goinfr
 
 ################################################################################
 
+# Colors
+blue=$'\033[0;34m'
+cyan=$'\033[1;96m'
+reset=$'\033[0;39m'
+
+# Check for update (comparing headers only to avoid false positive if the user changed config vars)
+if [[ $(head -n 12 "${BASH_SOURCE[0]}" | shasum) != $(head -n 12 <(curl -s https://raw.githubusercontent.com/alexandregv/42toolbox/master/init_docker.sh) | shasum) ]]; then
+	echo -e "${blue}A ${cyan}new version${blue} of ${cyan}init_docker.sh${blue} is available. Download it here: ${cyan}https://github.com/alexandregv/42toolbox${reset}"
+	read -n1 -p "${blue}Continue without updating (not recommended)? [y/${cyan}N${blue}]${reset} " input
+	echo ""
+	if [ ! -n "$input" ] || [ "$input" != "y" ]; then
+		exit
+	fi
+fi
+
 # Uninstall docker, docker-compose and docker-machine if they are installed with brew
-brew uninstall -f docker docker-compose docker-machine || true
+brew uninstall -f docker docker-compose docker-machine ;:
 
 # Check if Docker is installed with MSC and open MSC if not
-if [ ! -d "/Applications/Docker.app" ]; then
-	echo $'\033[0;34m'Please install $'\033[1;96m'Docker for Mac $'\033[0;34m'from the MSC \(Managed Software Center\)$'\033[0;39m'
+if [ ! -d "/Applications/Docker.app" ] && [ ! -d "~/Applications/Docker.app" ]; then
+	echo -e "${blue}Please install ${cyan}Docker for Mac ${blue}from the MSC (Managed Software Center)${reset}"
 	open -a "Managed Software Center"
-	read -p $'\033[0;34m'Press\ RETURN\ when\ you\ have\ successfully\ installed\ $'\033[1;96m'Docker\ for\ Mac$'\033[0;34m'...$'\033[0;39m'
+	read -n1 -p "${blue}Press RETURN when you have successfully installed ${cyan}Docker for Mac${blue}...${reset}"
+	echo ""
 fi
 
-# Create needed files in destination and make symlinks
-if [ ! -d $docker_destination ]; then
-	pkill Docker
-	rm -rf ~/Library/Containers/com.docker.docker ~/.docker
-	mkdir -p $docker_destination/{com.docker.docker,.docker}
-	ln -sf $docker_destination/com.docker.docker ~/Library/Containers/com.docker.docker
-	ln -sf $docker_destination/.docker ~/.docker
+# Kill Docker if started, so it doesn't create files during the process
+pkill Docker
+
+# Ask to reset destination if it already exists
+if [ -d $docker_destination ]; then
+	read -n1 -p "${blue}Folder ${cyan}$docker_destination${blue} already exists, do you want to reset it? [y/${cyan}N${blue}]${reset} " input
+	echo ""
+	if [ -n "$input" ] && [ "$input" = "y" ]; then
+		rm -rf $docker_destination/{com.docker.{docker,helper},.docker} &>/dev/null ;:
+	fi
 fi
+
+# Unlinks all symlinks, if they are
+unlink ~/Library/Containers/com.docker.docker &>/dev/null ;:
+unlink ~/Library/Containers/com.docker.helper &>/dev/null ;:
+unlink ~/.docker &>/dev/null ;:
+
+# Delete directories if they were not symlinks
+rm -rf ~/Library/Containers/com.docker.{docker,helper} ~/.docker &>/dev/null ;:
+
+# Create destination directories in case they don't already exist
+mkdir -p $docker_destination/{com.docker.{docker,helper},.docker}
+
+# Make symlinks
+ln -sf $docker_destination/com.docker.docker ~/Library/Containers/com.docker.docker
+ln -sf $docker_destination/com.docker.helper ~/Library/Containers/com.docker.helper
+ln -sf $docker_destination/.docker ~/.docker
 
 # Start Docker for Mac
-open -a Docker
-echo $'\033[1;96m'Docker$'\033[0;34m' is now starting\! Please report any bug to: $'\033[1m'aguiot--$'\033[0;39m'
+open -g -a Docker
+
+echo -e "${cyan}Docker${blue} is now starting! Please report any bug to: ${cyan}aguiot--${reset}"

@@ -9,4 +9,5 @@ RUN wget https://wordpress.org/latest.tar.gz \
 
 COPY wp-config-tmp.php /www/wp-config.php
 
+EXPOSE 5050
 CMD ["php", "-S", "0.0.0.0:5050", "-t", "/www/"]

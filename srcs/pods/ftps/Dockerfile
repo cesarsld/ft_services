@@ -14,4 +14,5 @@ RUN apk upgrade && \
 COPY start-tmp.sh /bin/start-tmp.sh
 RUN chmod +x /bin/start-tmp.sh
 
+EXPOSE 21 21000
 ENTRYPOINT ["/bin/start-tmp.sh"]

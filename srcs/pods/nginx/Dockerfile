@@ -3,7 +3,7 @@ FROM alpine:latest
 # update && install nginx && bash && openssl && folder for nginx pid
 RUN apk update && apk add nginx \
 && apk add --no-cache --upgrade bash \
-&& apk add openssl && mkdir -p var/run/nginx
+&& apk add openssl openssh && mkdir -p var/run/nginx
 
 # create user for nginx && generate nginx folder && add permissions
 RUN adduser -D -g 'www' www \
@@ -17,6 +17,12 @@ RUN mkdir /etc/nginx/ssl \
 # Nginx config
 RUN rm /etc/nginx/nginx.conf
 COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./start.sh /start.sh
+COPY ./sshd_config /etc/ssh/
+COPY ./ssh_host_rsa_key /etc/ssh/
 
+RUN chmod 600 /etc/ssh/ssh_host_* && chmod +x /start.sh
+
+EXPOSE 80 443 6666
 # Start nginx
-CMD [ "nginx" , "-g", "daemon off;" ]
+ENTRYPOINT sh /start.sh

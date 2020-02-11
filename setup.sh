@@ -52,32 +52,36 @@ cp srcs/pods/ftps/vsftpd.conf srcs/pods/ftps/vsftpd-tmp.conf
 sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/ftps/vsftpd-tmp.conf
 cp srcs/pods/ftps/start.sh srcs/pods/ftps/start-tmp.sh
 sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/pods/ftps/start-tmp.sh
-# cp srcs/ftps/scripts/start.sh srcs/ftps/scripts/start-tmp.sh
-# sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/ftps/scripts/start-tmp.sh
+cp srcs/yaml/telegraf_model.yaml srcs/yaml/telegraf.yaml
+sed -i '' "s/MINIKUBE_IP/$MINIKUBE_IP/g" srcs/yaml/telegraf.yaml
+
+echo "UPDATE data_source SET url = 'http://$MINIKUBE_IP:8086'" | sqlite3 srcs/pods/grafana/grafana.db
 
 # Build Docker images
 
 printf "Building Docker images...\n"
 
-# docker build -t services/influxdb srcs/pods/influxdb
-# docker build -t services/mysql srcs/pods/mysql
-# docker build -t services/wordpress srcs/pods/wordpress
-# docker build -t services/nginx srcs/pods/nginx
+docker build -t services/influxdb srcs/pods/influxdb
+docker build -t services/mysql srcs/pods/mysql
+docker build -t services/wordpress srcs/pods/wordpress
+docker build -t services/nginx srcs/pods/nginx
 docker build -t services/ftps srcs/pods/ftps
-# docker build -t services/grafana srcs/pods/grafana
+docker build -t services/grafana srcs/pods/grafana
+docker build -t services/telegraf srcs/pods/telegraf
 
 # for SERVICE in $SERVICE_LIST
 # do
 # 	apply_yaml $SERVICE
 # done
 
-# kubectl apply -f srcs/yaml/grafana.yaml
-# kubectl apply -f srcs/yaml/influxdb.yaml
-# kubectl apply -f srcs/yaml/mysql.yaml
-# kubectl apply -f srcs/yaml/nginx.yaml
-# kubectl apply -f srcs/yaml/phpmyadmin.yaml
-# kubectl apply -f srcs/yaml/wordpress.yaml
+kubectl apply -f srcs/yaml/grafana.yaml
+kubectl apply -f srcs/yaml/influxdb.yaml
+kubectl apply -f srcs/yaml/mysql.yaml
+kubectl apply -f srcs/yaml/nginx.yaml
+kubectl apply -f srcs/yaml/phpmyadmin.yaml
+kubectl apply -f srcs/yaml/wordpress.yaml
 kubectl apply -f srcs/yaml/ftps.yaml
+kubectl apply -f srcs/yaml/telegraf.yaml
 
 # kubectl apply -f srcs/ingress.yaml > /dev/null
 
@@ -90,6 +94,10 @@ rm -rf srcs/pods/mysql/wordpress-tmp.sql
 rm -rf srcs/pods/wordpress/wp-config-tmp.sql
 rm -rf srcs/pods/ftps/vsftpd-tmp.conf
 rm -rf srcs/pods/ftps/start-tmp.sh
+rm -rf srcs/yaml/telegraf.yaml
 
 server_ip=`minikube ip`
 echo -ne "\033[1;33m+>\033[0;33m IP : $server_ip \n"
+
+### Test SSH
+# ssh admin@$(minikube ip) -p 6666
