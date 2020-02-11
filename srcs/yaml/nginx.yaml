@@ -5,14 +5,11 @@ metadata:
   labels:
     app: nginxapp
 spec:
-  type: NodePort
   ports:
   - port: 80
+    targetPort: 80
     protocol: TCP
     name: http
-  - port: 443
-    protocol: TCP
-    name: https
   selector:
     app: nginxapp
 ---
@@ -27,6 +24,10 @@ spec:
   selector:
     app: nginxapp
   ports:
+    - port: 443
+      nodePort: 443
+      protocol: TCP
+      name: https
     - name: ssh
       port: 6666
       nodePort: 6666
