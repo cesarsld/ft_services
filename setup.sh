@@ -78,4 +78,5 @@ echo -ne "\033[1;33m+>\033[0;33m IP : $server_ip \n"
 # ssh admin@$(minikube ip) -p 6666
 
 ### Crash Container
-# kubectl exec -it $(kubectl get pods | grep mysql | cut -d" " -f1) -- /bin/sh -c "kill 1"
+# kubectl exec -it $(kubectl get pods | grep mysql | cut -d" " -f1) -- /bin/sh -c "ps"  
+# kubectl exec -it $(kubectl get pods | grep mysql | cut -d" " -f1) -- /bin/sh -c "kill number" 

@@ -18,4 +18,4 @@ RUN chmod 777 init_mysql.sh
 
 EXPOSE 3306
 # Start configuration script
-CMD ./init_docker.sh
+ENTRYPOINT ["./init_docker.sh"]

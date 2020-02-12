@@ -14,6 +14,19 @@ spec:
   selector:
     app: influxdbapp
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-pv-claim
+  labels:
+    app: influxdbapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,17 +49,10 @@ spec:
         ports:
         - containerPort: 8086
         imagePullPolicy: Never
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: influxdb-ingress
-  namespace: default
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /influx
-        backend:
-          serviceName: influxdb-svc
-          servicePort: 8086
+        volumeMounts:
+            - name: influxdb-persistent-storage
+              mountPath: /var/lib/influxdb
+      volumes:
+        - name: influxdb-persistent-storage
+          persistentVolumeClaim:
+            claimName: influxdb-pv-claim
